@@ -1,0 +1,234 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: smarthouse-postgres
+    environment:
+      - POSTGRES_DB=smarthouse
+      - POSTGRES_USER=smarthouse
+      - POSTGRES_PASSWORD=smarthouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: smarthouse-mqtt
+    command: >
+      /bin/sh -c "exec mosquitto -c /mosquitto/config/mosquitto.conf"
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/aclfile:/mosquitto/config/aclfile:ro
+      - ./certs:/mosquitto/config/certs:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  device-registry:
+    build:
+      context: ./services/device_registry
+    container_name: smarthouse-device-registry
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=8883
+      - MQTT_TLS_ENABLED=true
+      - MQTT_TLS_CA_CERT=/app/certs/ca.crt
+      - MQTT_TLS_CLIENT_CERT=/app/certs/device-registry.crt
+      - MQTT_TLS_CLIENT_KEY=/app/certs/device-registry.key
+      - DATABASE_URL=postgresql://smarthouse:smarthouse@postgres:5432/smarthouse
+      - PROVISIONING_MASTER_KEY=changeme-provisioning-local-dev
+      - JWT_SECRET=smarthouse-jwt-local-dev-secret
+      - JWT_PREVIOUS_SECRET=smarthouse-jwt-previous-local-dev-secret
+      - JWT_ISSUER=smarthouse-device-registry
+      - JWT_AUDIENCE=smarthouse-services
+      - JWT_ALGORITHM=HS256
+      - JWT_ACTIVE_KID=k1
+      - JWT_PREVIOUS_KID=k0
+      - AUTH_RATE_LIMIT_WINDOW_SECONDS=60
+      - AUTH_RATE_LIMIT_MAX_REQUESTS=30
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./certs:/app/certs:ro
+    depends_on:
+      - postgres
+      - mqtt
+
+  automation-engine:
+    build:
+      context: ./services/automation_engine
+    container_name: smarthouse-automation-engine
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=8883
+      - MQTT_TLS_ENABLED=true
+      - MQTT_TLS_CA_CERT=/app/certs/ca.crt
+      - MQTT_TLS_CLIENT_CERT=/app/certs/automation-engine.crt
+      - MQTT_TLS_CLIENT_KEY=/app/certs/automation-engine.key
+      - RULES_PATH=/app/config/rules.yaml
+      - DATABASE_URL=postgresql://smarthouse:smarthouse@postgres:5432/smarthouse
+      - JWT_SECRET=smarthouse-jwt-local-dev-secret
+      - JWT_PREVIOUS_SECRET=smarthouse-jwt-previous-local-dev-secret
+      - JWT_ISSUER=smarthouse-device-registry
+      - JWT_AUDIENCE=smarthouse-services
+      - JWT_ALGORITHM=HS256
+      - JWT_ACTIVE_KID=k1
+      - JWT_PREVIOUS_KID=k0
+      - AUTH_RATE_LIMIT_WINDOW_SECONDS=60
+      - AUTH_RATE_LIMIT_MAX_REQUESTS=30
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./config/automation/rules.yaml:/app/config/rules.yaml:ro
+      - ./certs:/app/certs:ro
+    depends_on:
+      - postgres
+      - mqtt
+
+  bridge-modbus:
+    build:
+      context: ./services
+      dockerfile: bridge_modbus/Dockerfile
+    container_name: smarthouse-bridge-modbus
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=8883
+      - MQTT_TLS_ENABLED=true
+      - MQTT_TLS_CA_CERT=/app/certs/ca.crt
+      - MQTT_TLS_CLIENT_CERT=/app/certs/bridge-modbus.crt
+      - MQTT_TLS_CLIENT_KEY=/app/certs/bridge-modbus.key
+      - BRIDGE_PROTOCOL=modbus_tcp
+      - HOUSE_ID=home01
+      - DEVICE_ID=bridge-modbus-01
+    ports:
+      - "8091:8091"
+    volumes:
+      - ./certs:/app/certs:ro
+    depends_on:
+      - mqtt
+
+  bridge-knx:
+    build:
+      context: ./services
+      dockerfile: bridge_knx/Dockerfile
+    container_name: smarthouse-bridge-knx
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=8883
+      - MQTT_TLS_ENABLED=true
+      - MQTT_TLS_CA_CERT=/app/certs/ca.crt
+      - MQTT_TLS_CLIENT_CERT=/app/certs/bridge-knx.crt
+      - MQTT_TLS_CLIENT_KEY=/app/certs/bridge-knx.key
+      - BRIDGE_PROTOCOL=knx
+      - HOUSE_ID=home01
+      - DEVICE_ID=bridge-knx-01
+    ports:
+      - "8092:8092"
+    volumes:
+      - ./certs:/app/certs:ro
+    depends_on:
+      - mqtt
+
+  bridge-bacnet:
+    build:
+      context: ./services
+      dockerfile: bridge_bacnet/Dockerfile
+    container_name: smarthouse-bridge-bacnet
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=8883
+      - MQTT_TLS_ENABLED=true
+      - MQTT_TLS_CA_CERT=/app/certs/ca.crt
+      - MQTT_TLS_CLIENT_CERT=/app/certs/bridge-bacnet.crt
+      - MQTT_TLS_CLIENT_KEY=/app/certs/bridge-bacnet.key
+      - BRIDGE_PROTOCOL=bacnet
+      - HOUSE_ID=home01
+      - DEVICE_ID=bridge-bacnet-01
+    ports:
+      - "8093:8093"
+    volumes:
+      - ./certs:/app/certs:ro
+    depends_on:
+      - mqtt
+
+  edge-controller:
+    build:
+      context: ./services/edge_controller
+    container_name: smarthouse-edge-controller
+    environment:
+      - DEVICE_REGISTRY_URL=http://device-registry:8081
+      - AUTOMATION_ENGINE_URL=http://automation-engine:8082
+      - BRIDGE_MODBUS_URL=http://bridge-modbus:8091
+      - BRIDGE_KNX_URL=http://bridge-knx:8092
+      - BRIDGE_BACNET_URL=http://bridge-bacnet:8093
+      - DATABASE_URL=postgresql://smarthouse:smarthouse@postgres:5432/smarthouse
+      - PROVISIONING_MASTER_KEY=changeme-provisioning-local-dev
+      - EDGE_API_KEY=changeme-edge-local-dev
+      - EDGE_API_KEY_ADMIN=changeme-edge-local-dev
+      - EDGE_API_KEY_OPERATOR=changeme-edge-operator-local-dev
+      - EDGE_HTTP_TIMEOUT_SECONDS=5
+      - EDGE_CONFIG_PATH=/app/config/edge_config.json
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./config/edge:/app/config
+    depends_on:
+      - device-registry
+      - automation-engine
+      - bridge-modbus
+      - bridge-knx
+      - bridge-bacnet
+
+  project-engine:
+    build:
+      context: ./services/project_engine
+    container_name: smarthouse-project-engine
+    ports:
+      - "8085:8085"
+
+  system-generator:
+    build:
+      context: ./services/system_generator
+    container_name: smarthouse-system-generator
+    ports:
+      - "8086:8086"
+
+  cloud-services:
+    build:
+      context: ./cloud_services
+    container_name: smarthouse-cloud-services
+    ports:
+      - "8087:8087"
+
+  installer-platform:
+    build:
+      context: ./installer_platform
+    container_name: smarthouse-installer-platform
+    ports:
+      - "8088:8088"
+
+  telemetry:
+    build:
+      context: ./services/telemetry
+    container_name: smarthouse-telemetry
+    ports:
+      - "8089:8089"
+
+  ai-service:
+    build:
+      context: ./services/ai
+    container_name: smarthouse-ai-service
+    ports:
+      - "8090:8090"
+
+  observability-api:
+    build:
+      context: ./monitoring/observability_api
+    container_name: smarthouse-observability-api
+    ports:
+      - "8094:8094"
+
+volumes:
+  postgres_data:

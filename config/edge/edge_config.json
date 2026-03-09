@@ -1,0 +1,9 @@
+{
+  "site_id": "home01",
+  "site_name": "Primary Site",
+  "enabled_bridges": [
+    "modbus",
+    "knx",
+    "bacnet"
+  ]
+}

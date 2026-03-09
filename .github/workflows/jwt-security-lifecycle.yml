@@ -1,0 +1,61 @@
+name: JWT Security Lifecycle
+
+on:
+  schedule:
+    - cron: "0 4 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: jwt-security-lifecycle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-jwt-lifecycle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate baseline certificates
+        run: |
+          chmod +x scripts/generate_mqtt_tls_certs.sh
+          scripts/generate_mqtt_tls_certs.sh
+
+      - name: Build and start stack
+        run: docker compose up -d --build
+
+      - name: Wait for APIs
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8081/health >/dev/null && curl -fsS http://localhost:8082/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Services did not become healthy in time"
+          docker compose logs --no-color
+          exit 1
+
+      - name: Run JWT lifecycle checks
+        run: |
+          chmod +x scripts/auth_token.sh
+          chmod +x scripts/verify_auth_security_controls.sh
+          chmod +x scripts/verify_jwt_kid_rotation.sh
+          chmod +x scripts/prune_revoked_tokens.sh
+          chmod +x scripts/verify_revoked_token_prune.sh
+
+          scripts/verify_auth_security_controls.sh
+          scripts/verify_jwt_kid_rotation.sh
+          scripts/verify_revoked_token_prune.sh
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

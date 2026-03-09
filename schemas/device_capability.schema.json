@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smarthouse.local/schemas/device_capability.schema.json",
+  "title": "Device Capability Model",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "protocol",
+    "capabilities"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol": {
+      "type": "string",
+      "enum": [
+        "mqtt",
+        "can",
+        "rs485",
+        "modbus_rtu",
+        "modbus_tcp",
+        "ethernet",
+        "wifi",
+        "bluetooth",
+        "zigbee",
+        "thread",
+        "matter",
+        "knx",
+        "bacnet"
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sensors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

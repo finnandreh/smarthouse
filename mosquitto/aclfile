@@ -1,0 +1,26 @@
+user device-registry
+topic read platform/+/+/event
+topic write platform/+/+/event
+
+user automation-engine
+topic read platform/+/+/event
+topic write platform/+/+/control
+
+user bridge-modbus
+topic write platform/home01/bridge-modbus-01/event
+
+user bridge-knx
+topic write platform/home01/bridge-knx-01/event
+
+user bridge-bacnet
+topic write platform/home01/bridge-bacnet-01/event
+
+user test-client
+topic readwrite platform/#
+
+user esp32-simulator
+topic write platform/home01/device123/event
+topic read platform/home01/device123/control
+
+user revocation-test
+topic readwrite platform/revocation/#

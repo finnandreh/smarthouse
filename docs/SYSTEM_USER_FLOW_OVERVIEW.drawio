@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" modified="2026-03-09T13:20:00.000Z" agent="GitHub Copilot" version="24.7.17" type="device">
+  <diagram id="smart-house-user-flow" name="User Order To Operate">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="user" value="User / Home Owner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="200" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="order" value="Order + Provision Request&#xa;(Installer App / Portal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="110" width="250" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge" value="Edge Controller&#xa;Control Plane" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="90" width="220" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="registry" value="Device Registry&#xa;Registration + Identity + JWT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="860" y="40" width="260" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="automation" value="Automation Engine&#xa;Rules + Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="860" y="140" width="260" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mqtt" value="MQTT Broker (TLS/mTLS/ACL/CRL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="90" width="280" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="bridges" value="Protocol Bridges&#xa;Modbus / KNX / BACnet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="860" y="280" width="260" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="devices" value="Physical Devices&#xa;ESP32 / PLC / Sensors / Actuators" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="280" width="280" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ops" value="User Operation&#xa;Toggle, Schedule, Monitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="290" width="250" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="audit" value="Audit + Persistence&#xa;Postgres (events, actions, auth, edge logs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="290" width="220" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" value="order" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="user" target="order">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="provision workflow" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="order" target="edge">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" value="register devices + tokens" style="endArrow=block;html=1;" edge="1" parent="1" source="edge" target="registry">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" value="reload rules" style="endArrow=block;html=1;" edge="1" parent="1" source="edge" target="automation">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" value="events + commands" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="edge" target="mqtt">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" value="normalized telemetry" style="endArrow=block;html=1;" edge="1" parent="1" source="bridges" target="mqtt">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" value="field protocols" style="endArrow=block;html=1;" edge="1" parent="1" source="devices" target="bridges">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" value="state + telemetry" style="endArrow=block;html=1;" edge="1" parent="1" source="mqtt" target="ops">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" value="commands" style="endArrow=block;html=1;" edge="1" parent="1" source="ops" target="edge">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" value="audit + state" style="endArrow=block;html=1;" edge="1" parent="1" source="edge" target="audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" value="events + actions" style="endArrow=block;html=1;" edge="1" parent="1" source="automation" target="audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e12" value="registration + auth logs" style="endArrow=block;html=1;" edge="1" parent="1" source="registry" target="audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="smart-house-sequence-flow" name="Order To Operate Timeline">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title2" value="SmartHouse End-to-End Timeline" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="l1" value="User" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="160" height="840" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2" value="Installer App" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="80" width="180" height="840" as="geometry"/>
+        </mxCell>
+        <mxCell id="l3" value="Edge Controller" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="80" width="200" height="840" as="geometry"/>
+        </mxCell>
+        <mxCell id="l4" value="Registry + Automation" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="80" width="220" height="840" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="MQTT + Bridges + Devices" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="880" y="80" width="260" height="840" as="geometry"/>
+        </mxCell>
+        <mxCell id="l6" value="Postgres Audit" style="shape=swimlane;horizontal=0;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="80" width="180" height="840" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="s1" value="1) Place order and choose package" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="120" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="2) Submit provisioning request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="245" y="210" width="130" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="3) Create provisioning session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="290" width="140" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="4) Issue token + register device" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="670" y="370" width="160" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" value="5) Device publishes telemetry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="930" y="450" width="160" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6" value="6) Evaluate rules and generate actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="670" y="530" width="160" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s7" value="7) Commands sent to bridges/devices" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="930" y="610" width="160" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="s8" value="8) User operates system (toggle/schedule)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="690" width="120" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="s9" value="9) Edge applies safety + maintenance guards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="780" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="s10" value="10) Persist events, actions, auth and edge audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="860" width="140" height="56" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="se1" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s1" target="s2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se2" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s2" target="s3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se3" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s3" target="s4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se4" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s4" target="s5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se5" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s5" target="s6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se6" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s6" target="s7">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se7" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s7" target="s8">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se8" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s8" target="s9">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se9" value="" style="endArrow=block;html=1;strokeWidth=2;" edge="1" parent="1" source="s9" target="s10">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

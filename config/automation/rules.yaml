@@ -1,0 +1,11 @@
+rules:
+  - id: motion_after_sunset_lights_on
+    description: Turn relay on when motion is detected after sunset
+    trigger:
+      event: motion_detected
+    conditions:
+      event: motion_detected
+      after_sunset: true
+    actions:
+      - action: set_relay
+        value: "ON"
