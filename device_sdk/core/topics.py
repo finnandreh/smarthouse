@@ -1,6 +1,7 @@
 from typing import Tuple
 
 TOPIC_PREFIX = "platform"
+DISCOVERY_TOPIC = "platform/discovery"
 ALLOWED_KINDS = {"status", "telemetry", "control", "event", "config"}
 
 
@@ -20,3 +21,7 @@ def parse_topic(topic: str) -> Tuple[str, str, str]:
     if kind not in ALLOWED_KINDS:
         raise ValueError(f"Unsupported topic kind: {kind}")
     return house, device_id, kind
+
+
+def discovery_topic() -> str:
+    return DISCOVERY_TOPIC

@@ -4,6 +4,7 @@ from device_sdk.capabilities.catalog import capabilities_for_device_class
 from device_sdk.capabilities.payloads import (
     build_announce_payload,
     build_control_ack_payload,
+    build_discovery_payload,
     build_event_payload,
 )
 from device_sdk.core.models import DeviceDescriptor
@@ -30,6 +31,13 @@ class PayloadAndCatalogTests(unittest.TestCase):
         self.assertEqual(payload["event"], "relay_state")
         self.assertEqual(payload["value"], "ON")
         self.assertEqual(payload["metadata"]["source"], "test")
+
+    def test_discovery_payload_shape(self):
+        payload = build_discovery_payload(self.device, firmware_version="1.0.0")
+        self.assertEqual(payload["device_id"], "dev-1")
+        self.assertEqual(payload["device_type"], "relay_module")
+        self.assertEqual(payload["firmware_version"], "1.0.0")
+        self.assertIn("timestamp", payload)
 
     def test_control_ack_payload_reason_optional(self):
         payload = build_control_ack_payload("set_relay", applied=False, reason="Unsupported")

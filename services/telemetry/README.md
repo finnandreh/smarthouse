@@ -8,6 +8,8 @@ Implemented baseline:
 - `GET /health` for readiness and local retention posture.
 - `POST /ingest/validate` for contract/schema validation.
 - `POST /ingest/batch` for deterministic ingest acknowledgements.
+- Writer abstraction with `TELEMETRY_WRITER` (`inmemory` or `postgres_stub`).
+- Retention placeholders via `TELEMETRY_RETENTION_HOURS` and `POST /retention/run`.
 
 Verification:
 - `scripts/verify_telemetry.sh`

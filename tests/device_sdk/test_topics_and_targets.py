@@ -1,7 +1,7 @@
 import unittest
 
 from device_sdk.core.targets import get_target_profile
-from device_sdk.core.topics import build_topic, parse_topic
+from device_sdk.core.topics import build_topic, discovery_topic, parse_topic
 
 
 class TopicsAndTargetsTests(unittest.TestCase):
@@ -17,6 +17,9 @@ class TopicsAndTargetsTests(unittest.TestCase):
     def test_parse_topic_rejects_invalid_prefix(self):
         with self.assertRaises(ValueError):
             parse_topic("wrong/home01/dev-1/event")
+
+    def test_discovery_topic(self):
+        self.assertEqual(discovery_topic(), "platform/discovery")
 
     def test_get_target_profile(self):
         profile = get_target_profile("ESP32")

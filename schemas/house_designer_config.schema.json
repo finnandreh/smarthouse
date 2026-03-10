@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smarthouse.local/schemas/house_designer_config.schema.json",
+  "title": "House Designer Config",
+  "type": "object",
+  "required": ["version", "client", "properties"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "client": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "properties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "subjects"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "location": {"type": "string"},
+          "subjects": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "type", "floors"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "name": {"type": "string", "minLength": 1},
+                "type": {"type": "string", "minLength": 1},
+                "floors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "name", "level", "rooms"],
+                    "properties": {
+                      "id": {"type": "string", "minLength": 1},
+                      "name": {"type": "string", "minLength": 1},
+                      "level": {"type": "integer"},
+                      "rooms": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "required": ["id", "name", "units"],
+                          "properties": {
+                            "id": {"type": "string", "minLength": 1},
+                            "name": {"type": "string", "minLength": 1},
+                            "units": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "required": ["id", "type", "name", "quantity"],
+                                "properties": {
+                                  "id": {"type": "string", "minLength": 1},
+                                  "type": {"type": "string", "minLength": 1},
+                                  "name": {"type": "string", "minLength": 1},
+                                  "quantity": {"type": "integer", "minimum": 1},
+                                  "notes": {"type": "string"}
+                                },
+                                "additionalProperties": true
+                              }
+                            }
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -5,7 +5,12 @@ from typing import List, Literal
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from .writers import TelemetryEnvelope, build_writer, retention_cutoff, retention_hours_from_env, writer_mode_from_env
+
 app = FastAPI(title="SmartHouse Telemetry Service", version="0.1.0")
+_writer = build_writer()
+_writer_mode = writer_mode_from_env()
+_retention_hours = retention_hours_from_env()
 
 
 class MetricPoint(BaseModel):
@@ -45,7 +50,27 @@ def _validate(payload: IngestRequest) -> List[str]:
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "telemetry", "local_retention": True}
+    return {
+        "status": "ok",
+        "service": "telemetry",
+        "local_retention": True,
+        "writer_mode": _writer_mode,
+        "retention_hours": _retention_hours,
+    }
+
+
+@app.get("/metrics")
+def metrics():
+    # Placeholder metrics contract for observability pipeline wiring.
+    return {
+        "service": "telemetry",
+        "writer_mode": _writer_mode,
+        "metrics": {
+            "telemetry_ingest_total": "placeholder",
+            "telemetry_validation_failures_total": "placeholder",
+            "telemetry_retention_pruned_total": "placeholder",
+        },
+    }
 
 
 @app.post("/ingest/validate", response_model=ValidateResponse)
@@ -60,10 +85,35 @@ def ingest_batch(payload: IngestRequest):
     if errors:
         raise HTTPException(status_code=422, detail={"code": "INVALID_TELEMETRY_BATCH", "errors": errors})
 
+    received_at = datetime.now(timezone.utc).isoformat()
+    _writer.write(
+        TelemetryEnvelope(
+            house_id=payload.house_id,
+            source_protocol=payload.source_protocol,
+            points=[point.model_dump() for point in payload.points],
+            received_at=received_at,
+        )
+    )
+
     return IngestResponse(
         accepted=True,
         house_id=payload.house_id,
         source_protocol=payload.source_protocol,
         point_count=len(payload.points),
-        received_at=datetime.now(timezone.utc).isoformat(),
+        received_at=received_at,
     )
+
+
+@app.post("/retention/run")
+def run_retention():
+    # Placeholder lifecycle endpoint for retention scheduling integration.
+    now = datetime.now(timezone.utc)
+    cutoff = retention_cutoff(now, _retention_hours)
+    pruned = _writer.prune_older_than(cutoff)
+    return {
+        "status": "ok",
+        "writer_mode": _writer_mode,
+        "retention_hours": _retention_hours,
+        "pruned_records": pruned,
+        "ran_at": now.isoformat(),
+    }

@@ -18,6 +18,18 @@ def build_announce_payload(device: DeviceDescriptor) -> Dict[str, object]:
     }
 
 
+def build_discovery_payload(device: DeviceDescriptor, firmware_version: str = "0.1.0") -> Dict[str, object]:
+    return {
+        "device_id": device.id,
+        "house": device.house,
+        "device_type": device.type,
+        "protocol": device.protocol,
+        "firmware_version": firmware_version,
+        "capabilities": device.capabilities,
+        "timestamp": _utc_now_iso(),
+    }
+
+
 def build_event_payload(event: str, value: object, metadata: Optional[Dict[str, object]] = None) -> Dict[str, object]:
     payload: Dict[str, object] = {
         "event": event,

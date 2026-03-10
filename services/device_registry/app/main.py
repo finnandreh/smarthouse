@@ -12,6 +12,8 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 import psycopg
 
+from .mqtt_qos import qos_for_kind
+
 
 class DeviceRegistration(BaseModel):
     id: str = Field(min_length=1)
@@ -68,6 +70,7 @@ ROLE_SCOPE_POLICY: Dict[str, Set[str]] = {
 _mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="device-registry")
 _auth_rate_lock = threading.Lock()
 _auth_rate_state: Dict[str, List[float]] = {}
+DISCOVERY_TOPIC = "platform/discovery"
 
 
 def _get_conn() -> psycopg.Connection:
@@ -277,26 +280,10 @@ def _enforce_auth_rate_limit(client_ip: str, endpoint: str):
 
 def _on_connect(client, userdata, flags, reason_code, properties):
     client.subscribe("platform/+/+/event")
+    client.subscribe(DISCOVERY_TOPIC)
 
 
-def _on_message(client, userdata, msg):
-    topic_parts = msg.topic.split("/")
-    if len(topic_parts) != 4:
-        return
-
-    _, house, device_id, kind = topic_parts
-    if kind != "event":
-        return
-
-    # Auto-register devices announcing themselves via event payload.
-    try:
-        payload = json.loads(msg.payload.decode("utf-8"))
-    except json.JSONDecodeError:
-        return
-
-    if payload.get("event") != "device_announce":
-        return
-
+def _register_from_announce(house: str, device_id: str, payload: dict):
     entry = DeviceRegistration(
         id=device_id,
         house=house,
@@ -306,6 +293,50 @@ def _on_message(client, userdata, msg):
     )
     _upsert_device(entry)
     _insert_registry_event(entry, "device_announce", payload)
+
+
+def _register_from_discovery(payload: dict):
+    device_id = str(payload.get("device_id", "")).strip()
+    if not device_id:
+        return
+
+    capabilities = payload.get("capabilities", [])
+    if not isinstance(capabilities, list):
+        capabilities = []
+
+    entry = DeviceRegistration(
+        id=device_id,
+        house=str(payload.get("house", "home01")),
+        type=str(payload.get("device_type", "unknown")),
+        protocol=str(payload.get("protocol", "unknown")),
+        capabilities=[str(cap) for cap in capabilities],
+    )
+    _upsert_device(entry)
+    _insert_registry_event(entry, "device_discovery", payload)
+
+
+def _on_message(client, userdata, msg):
+    try:
+        payload = json.loads(msg.payload.decode("utf-8"))
+    except json.JSONDecodeError:
+        return
+
+    if msg.topic == DISCOVERY_TOPIC:
+        _register_from_discovery(payload)
+        return
+
+    topic_parts = msg.topic.split("/")
+    if len(topic_parts) != 4:
+        return
+
+    _, house, device_id, kind = topic_parts
+    if kind != "event":
+        return
+
+    if payload.get("event") != "device_announce":
+        return
+
+    _register_from_announce(house=house, device_id=device_id, payload=payload)
 
 
 def _mqtt_loop():
@@ -404,6 +435,19 @@ def startup_event():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/metrics")
+def metrics():
+    # Placeholder metrics contract for observability pipeline wiring.
+    return {
+        "service": SERVICE_NAME,
+        "metrics": {
+            "registry_devices_total": "placeholder",
+            "registry_events_total": "placeholder",
+            "auth_security_events_total": "placeholder",
+        },
+    }
 
 
 @app.post("/auth/token")
@@ -550,5 +594,5 @@ def register_device(device: DeviceRegistration, request_meta: Request, authoriza
         "event": "device_registered",
         "device": device.model_dump(),
     }
-    _mqtt_client.publish(event_topic, json.dumps(event_payload), qos=1)
+    _mqtt_client.publish(event_topic, json.dumps(event_payload), qos=qos_for_kind("event"))
     return {"registered": True, "device": device.model_dump()}

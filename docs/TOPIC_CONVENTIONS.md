@@ -12,6 +12,10 @@ Allowed kinds:
 - `event`
 - `config`
 
+Optional shared topic:
+
+- `platform/discovery`
+
 Examples:
 
 - `platform/home01/device123/status`

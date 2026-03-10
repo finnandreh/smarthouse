@@ -12,6 +12,8 @@ import yaml
 from fastapi import FastAPI, Header, HTTPException, Request
 import jwt
 
+from .mqtt_qos import qos_for_kind
+
 
 app = FastAPI(title="SmartHouse Automation Engine", version="0.1.0")
 
@@ -249,7 +251,7 @@ def _condition_matches(conditions: Dict[str, Any], payload: Dict[str, Any]) -> b
 def _execute_actions(house: str, device_id: str, actions: List[Dict[str, Any]]):
     for action in actions:
         control_topic = f"platform/{house}/{device_id}/control"
-        _mqtt_client.publish(control_topic, json.dumps(action), qos=1)
+        _mqtt_client.publish(control_topic, json.dumps(action), qos=qos_for_kind("control"))
         _log_action(house, device_id, action)
 
 
@@ -362,6 +364,19 @@ def startup_event():
 @app.get("/health")
 def health():
     return {"status": "ok", "loaded_rules": len(_rules)}
+
+
+@app.get("/metrics")
+def metrics():
+    # Placeholder metrics contract for observability pipeline wiring.
+    return {
+        "service": SERVICE_NAME,
+        "metrics": {
+            "automation_rules_loaded": len(_rules),
+            "automation_events_processed_total": "placeholder",
+            "automation_actions_published_total": "placeholder",
+        },
+    }
 
 
 @app.get("/rules")

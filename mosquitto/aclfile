@@ -1,5 +1,6 @@
 user device-registry
 topic read platform/+/+/event
+topic read platform/discovery
 topic write platform/+/+/event
 
 user automation-engine

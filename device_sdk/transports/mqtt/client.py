@@ -7,7 +7,8 @@ from typing import Callable, Optional
 import paho.mqtt.client as mqtt
 
 from device_sdk.core.models import DeviceDescriptor
-from device_sdk.core.topics import build_topic, parse_topic
+from device_sdk.core.qos import qos_for_kind
+from device_sdk.core.topics import build_topic, discovery_topic, parse_topic
 
 ControlHandler = Callable[[dict], Optional[dict]]
 
@@ -71,20 +72,31 @@ class MqttDeviceClient:
     def set_control_handler(self, handler: ControlHandler):
         self._control_handler = handler
 
-    def publish_event(self, payload: dict, qos: int = 1):
-        self._publish_json("event", payload, qos=qos)
+    def publish_event(self, payload: dict, qos: int | None = None):
+        qos_value = qos if qos is not None else qos_for_kind("event", critical=bool(payload.get("critical")))
+        self._publish_json("event", payload, qos=qos_value)
 
-    def publish_telemetry(self, payload: dict, qos: int = 1):
-        self._publish_json("telemetry", payload, qos=qos)
+    def publish_discovery(self, payload: dict, qos: int | None = None):
+        qos_value = qos if qos is not None else qos_for_kind("discovery")
+        self._publish_topic(discovery_topic(), payload, qos=qos_value)
 
-    def publish_status(self, payload: dict, qos: int = 1):
-        self._publish_json("status", payload, qos=qos)
+    def publish_telemetry(self, payload: dict, qos: int | None = None):
+        qos_value = qos if qos is not None else qos_for_kind("telemetry")
+        self._publish_json("telemetry", payload, qos=qos_value)
 
-    def publish_config(self, payload: dict, qos: int = 1):
-        self._publish_json("config", payload, qos=qos)
+    def publish_status(self, payload: dict, qos: int | None = None):
+        qos_value = qos if qos is not None else qos_for_kind("status")
+        self._publish_json("status", payload, qos=qos_value)
+
+    def publish_config(self, payload: dict, qos: int | None = None):
+        qos_value = qos if qos is not None else qos_for_kind("config")
+        self._publish_json("config", payload, qos=qos_value)
 
     def _publish_json(self, kind: str, payload: dict, qos: int = 1):
         topic = build_topic(self.device.house, self.device.id, kind)
+        self._publish_topic(topic, payload, qos=qos)
+
+    def _publish_topic(self, topic: str, payload: dict, qos: int = 1):
         msg = json.dumps(payload)
 
         last_error = "unknown"

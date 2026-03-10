@@ -16,6 +16,9 @@ class _FakeMqttClient:
     def publish_event(self, payload):
         return None
 
+    def publish_discovery(self, payload):
+        return None
+
     def publish_status(self, payload):
         return None
 

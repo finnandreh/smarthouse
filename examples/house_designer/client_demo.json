@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "client": {
+    "id": "client-001",
+    "name": "Demo Client"
+  },
+  "properties": [
+    {
+      "id": "property-main",
+      "label": "Main Address",
+      "location": "Oslo",
+      "subjects": [
+        {
+          "id": "subject-house",
+          "name": "House",
+          "type": "house",
+          "floors": [
+            {
+              "id": "floor-1",
+              "name": "First Floor",
+              "level": 1,
+              "rooms": [
+                {
+                  "id": "room-living",
+                  "name": "Living Room",
+                  "units": [
+                    {"id": "unit-1", "type": "light", "name": "Ceiling Light", "quantity": 6, "notes": "dimmable"},
+                    {"id": "unit-2", "type": "outlet", "name": "Wall Outlet", "quantity": 8, "notes": "16A"},
+                    {"id": "unit-3", "type": "tempsensor", "name": "Temperature Sensor", "quantity": 1, "notes": ""}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ from typing import Dict
 from device_sdk.capabilities.payloads import (
     build_announce_payload,
     build_control_ack_payload,
+    build_discovery_payload,
     build_event_payload,
     build_status_payload,
     build_telemetry_payload,
@@ -132,6 +133,7 @@ def run() -> int:
     mqtt_client.connect()
     print("Device connected, publishing announce and periodic telemetry/event updates")
 
+    mqtt_client.publish_discovery(build_discovery_payload(device))
     mqtt_client.publish_event(build_announce_payload(device))
     mqtt_client.publish_status(build_status_payload(status="online"))
 

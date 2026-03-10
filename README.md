@@ -1,64 +1,75 @@
-# SmartHouse Platform Scaffold
+# SmartHouse Platform
 
-This repository is scaffolded as a local-first smart-home platform baseline.
+**A local-first smart building operating framework for design-driven system generation.**
 
-## For Colleagues
+Mission: turn structured building intent into secure, deployable automation systems that run reliably at the edge.
 
-Current delivery state:
+SmartHouse is a local-first, event-driven smart building framework that turns design intent into deployable systems.
 
-- Phases 1-15 are scaffolded and have runnable baselines where applicable.
-- Automated hardening checks are integrated into local scripts and CI workflows.
-- Full verification target currently passes end-to-end.
+It combines:
 
-If you are downloading this project for the first time:
+- a modular microservice backbone
+- secure MQTT messaging and protocol bridges
+- a capability-based device model
+- a house-designer JSON contract used as generation input
 
-1. Install Docker Desktop and WSL2 (distribution: `smarthouse-dev`).
-2. Clone the repository and open it at `C:\smarthouse`.
-3. Run the full verification command from this README before making changes.
-4. Use phase-specific verification workflows/scripts when modifying scoped areas.
+The core idea is simple: **design -> contract -> generation -> runtime**.
 
-Documentation:
+## What This Is
 
-- Index: `docs/DOCUMENTATION_INDEX.md`
-- MQTT security runbook: `docs/MQTT_SECURITY_OPERATIONS_RUNBOOK.md`
-- Onboarding checklist: `docs/ONBOARDING_CHECKLIST.md`
+This repository is a professional prototype framework for building and evolving:
 
-## Included in this scaffold
+- device registries and automation runtimes
+- edge and cloud service layers
+- protocol integration paths (Modbus, KNX, BACnet)
+- installer/provisioning workflows
+- generation pipelines from structured building design
 
-- MQTT broker (`Eclipse Mosquitto`)
-- `device-registry` service for device announce/register
-- `automation-engine` service for event-driven rules
-- Shared topic conventions and capability schema
-- Device SDK baseline (`device_sdk`) for local secure clients
-- Example device simulator publisher
+It is designed to scale from one house to multi-site deployments while keeping local operation as first priority.
 
-## Quick start
+## Architecture Snapshot
 
-### 1) Start the stack
+Platform layers:
 
-Generate local TLS certificates first:
+1. Device Layer (real + simulated devices)
+2. Protocol Translation Layer (bridges)
+3. Messaging Layer (MQTT backbone)
+4. Edge Controller Layer (local orchestration)
+5. Cloud-Optional Layer (remote services)
 
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/generate_mqtt_tls_certs.sh && scripts/generate_mqtt_tls_certs.sh"
+Reference architecture and scope are defined in `docs/PROJECT_MASTER_SPEC.md`.
+
+## System Flow
+
+```mermaid
+flowchart LR
+	A[House Designer JSON] --> B[Contract Validation]
+	B --> C[Generation Artifacts]
+	C --> D[Provisioning and Topology]
+	D --> E[Runtime Services]
+	E --> F[MQTT Event Bus]
+	F --> G[Automation and Control]
+	G --> H[Device State and Telemetry]
 ```
 
-By default, the CA private key is stored outside the workspace at:
+## Maturity Snapshot
 
-- `/home/<user>/.smarthouse-secrets/ca/ca.key`
+| Area | Status | Notes |
+| --- | --- | --- |
+| Core backend services | Strong Prototype | Discovery dual-path, QoS policy, telemetry writer abstraction, metrics placeholders are in place. |
+| Security baseline | Operational Baseline | mTLS, ACL, JWT/RBAC controls, and security verification scripts are integrated. |
+| Design-to-contract pipeline | Strong Prototype | House designer JSON contract, schema validation, and parts generation pipeline are active. |
+| Frontend experience | Prototype First | UX refinement and prototype review are prioritized before hardening. |
+| Full production hardening | Planned | Tracked through inward execution and future hardening plan documents. |
 
-```bash
-docker compose up --build
-```
+## Runtime Services and Ports
 
-Services:
+Primary local endpoints:
 
 - MQTT TLS: `localhost:8883`
 - PostgreSQL: `localhost:5432`
 - Device Registry API: `http://localhost:8081`
 - Automation Engine API: `http://localhost:8082`
-- Modbus Bridge API: `http://localhost:8091`
-- KNX Bridge API: `http://localhost:8092`
-- BACnet Bridge API: `http://localhost:8093`
 - Edge Controller API: `http://localhost:8084`
 - Project Engine API: `http://localhost:8085`
 - System Generator API: `http://localhost:8086`
@@ -66,309 +77,77 @@ Services:
 - Installer Platform API: `http://localhost:8088`
 - Telemetry API: `http://localhost:8089`
 - AI Service API: `http://localhost:8090`
+- Modbus Bridge API: `http://localhost:8091`
+- KNX Bridge API: `http://localhost:8092`
+- BACnet Bridge API: `http://localhost:8093`
 - Observability API: `http://localhost:8094`
 
-Default local credentials:
+## Next Improvement Steps
 
-- MQTT identity auth: per-service client certificates (CN-based)
-- MQTT CA cert: `certs/ca.crt`
-- Example client cert: `certs/test-client.crt`
-- Example client key: `certs/test-client.key`
-- Provisioning bootstrap header for token issuance: `x-provisioning-key: changeme-provisioning-local-dev`
+The platform is designed for phased refinement. Current next steps:
 
-Protected HTTP APIs use Bearer JWTs with `role`, `house`, and `scopes` claims.
+1. Frontend prototype iteration before hardening.
+Continue UX and workflow improvements from `docs/FRONTEND_PROTOTYPE_FIRST_FUTURE_PLAN.md` and start hardening only after prototype sign-off.
 
-Default RBAC policy:
+2. Generation output expansion.
+Extend from parts-list output to topology, provisioning, and installer-ready artifacts while keeping JSON contract compatibility.
 
-- `operator`: `device:register`
-- `provisioner`: `device:register`
-- `automation-admin`: `rules:reload`
-- `admin`: all current scopes
+3. Inward hardening progression.
+Execute the next hardening wave tracked in `docs/PROTOTYPE_INWARD_EXECUTION_PLAN.md` in small, verifiable increments.
 
-Auth endpoints are rate limited (`AUTH_RATE_LIMIT_WINDOW_SECONDS` / `AUTH_RATE_LIMIT_MAX_REQUESTS`) and write allow/deny audit events to `auth_security_events`.
-JWT signing supports key rotation using `kid` (`JWT_ACTIVE_KID`) and optional fallback verification key (`JWT_PREVIOUS_KID` + `JWT_PREVIOUS_SECRET`).
+## Where to Start
 
-Issue a scoped token:
+If your focus is solution design and generation:
 
-```bash
-curl -X POST http://localhost:8081/auth/token \
-  -H "Content-Type: application/json" \
-  -H "x-provisioning-key: changeme-provisioning-local-dev" \
-  -d '{
-    "subject": "local-operator",
-    "role": "operator",
-    "house": "home01",
-    "scopes": ["device:register"],
-    "expires_minutes": 30
-  }'
-```
+1. Open `web/house_designer/index.html`.
+2. Build hierarchy: `client -> properties -> subjects -> floors -> rooms -> units`.
+3. Use `docs/HOUSE_DESIGNER_JSON_CONTRACT.md` for mapping rules.
+4. Generate initial parts output with `scripts/generate_parts_list.py`.
 
-Example token helper:
+If your focus is architecture and service development:
 
-```bash
-TOKEN=$(scripts/auth_token.sh local-operator operator home01 device:register 30)
-```
+1. Read `docs/PROJECT_MASTER_SPEC.md`.
+2. Read `docs/PROTOTYPE_INWARD_EXECUTION_PLAN.md`.
+3. Follow `docs/FRONTEND_PROTOTYPE_FIRST_FUTURE_PLAN.md` for frontend direction.
 
-Revoke a token (admin or equivalent scope):
+## Documentation Guide
 
-```bash
-ADMIN_TOKEN=$(scripts/auth_token.sh local-admin admin home01 rules:reload 30)
+Use these as the primary map:
 
-curl -X POST http://localhost:8081/auth/revoke \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-  -d "{\"token\":\"${TOKEN}\"}"
-```
+- `docs/DOCUMENTATION_INDEX.md`
+What it contains: full doc/workflow/script index.
 
-### 2) Register a sample device
+- `docs/PROJECT_MASTER_SPEC.md`
+What it contains: platform mission, principles, and target architecture.
 
-```bash
-curl -X POST http://localhost:8081/devices/register \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -d '{
-    "id": "device123",
-    "house": "home01",
-    "type": "relay_module",
-    "protocol": "wifi",
-    "capabilities": ["relay_output", "power_monitor"]
-  }'
-```
+- `docs/PROTOTYPE_INWARD_EXECUTION_PLAN.md`
+What it contains: implementation phases, current status, and hardening sequence.
 
-### 3) Publish an event (motion)
+- `docs/START_HERE_DESIGN_FLOW.md`
+What it contains: design-to-artifact workflow for new contributors.
 
-Use any MQTT client to publish:
+- `docs/HOUSE_DESIGNER_JSON_CONTRACT.md`
+What it contains: canonical JSON contract and generation mapping rules.
 
-- topic: `platform/home01/device123/event`
-- TLS CA cert: `certs/ca.crt`
-- mTLS client cert/key: `certs/test-client.crt` + `certs/test-client.key`
-- payload:
+- `docs/FRONTEND_PROTOTYPE_FIRST_FUTURE_PLAN.md`
+What it contains: frontend to-do list, prototype-first policy, and Copilot next tasks.
 
-```json
-{"event":"motion_detected","value":true}
-```
+## Internal Setup and Operations
 
-If `after_sunset` condition is true in the rule, automation engine publishes:
+Installation, environment replication, and operational commands are intentionally kept out of this GitHub-facing README.
 
-- topic: `platform/home01/device123/control`
-- payload:
+Use:
 
-```json
-{"action":"set_relay","value":"ON"}
-```
+- `docs/INTERNAL_SETUP_AND_OPERATIONS.md`
+- `docs/WSL_REPRODUCIBLE_SETUP.md`
+- `docs/VS_CODE_EXACT_SETUP.md`
+- `docs/ONBOARDING_CHECKLIST.md`
 
-### 4) Reload rules without restart
+## Validation Snapshot
 
-```bash
-TOKEN=$(scripts/auth_token.sh local-admin admin home01 rules:reload 30)
+Current scaffold verification target is maintained through repository verification scripts and CI workflows.
 
-curl -X POST http://localhost:8082/rules/reload
-  -H "Authorization: Bearer ${TOKEN}"
-```
+Start from:
 
-### 5) Emit normalized bridge test events
-
-```bash
-curl -X POST http://localhost:8091/emit-test -H "Content-Type: application/json" -d '{"event":"register_read","value":230.1}'
-curl -X POST http://localhost:8092/emit-test -H "Content-Type: application/json" -d '{"event":"group_write","value":1}'
-curl -X POST http://localhost:8093/emit-test -H "Content-Type: application/json" -d '{"event":"analog_input","value":22.8}'
-```
-
-Manual MQTT publish example:
-
-```bash
-mosquitto_pub --cafile certs/ca.crt --cert certs/test-client.crt --key certs/test-client.key -p 8883 -h localhost -t platform/home01/device123/event -m '{"event":"motion_detected","value":true}'
-```
-
-Each bridge converts protocol-native payloads to the internal MQTT event model and publishes to:
-
-- `platform/{house}/{device}/event`
-
-### 6) Edge controller operations
-
-Aggregated dependency health:
-
-```bash
-curl -X GET http://localhost:8084/health/dependencies
-```
-
-Provision device through edge controller:
-
-```bash
-curl -X POST http://localhost:8084/provision/device \
-  -H "Content-Type: application/json" \
-  -H "x-edge-api-key: changeme-edge-local-dev" \
-  -d '{
-    "id": "edge-device-1",
-    "house": "home01",
-    "type": "relay_module",
-    "protocol": "wifi",
-    "capabilities": ["relay_output"]
-  }'
-```
-
-## Project layout
-
-```text
-config/
-  automation/rules.yaml
-docs/
-cloud_services/
-examples/
-  devices/esp32_simulator.py  # SDK-backed compatibility entrypoint
-installer_platform/
-monitoring/
-mosquitto/
-  mosquitto.conf
-schemas/
-  device_capability.schema.json
-services/
-  automation_engine/
-  bridge_bacnet/
-  bridge_common/
-  bridge_knx/
-  bridge_modbus/
-  device_registry/
-  edge_controller/
-  project_engine/
-  system_generator/
-  telemetry/
-  ai/
-tests/
-  system/
-device_sdk/
-  core/
-  transports/mqtt/
-  capabilities/
-  examples/
-docker-compose.yml
-```
-
-## Next milestones
-
-1. Add MQTT auth/TLS certificates and secure provisioning flow
-2. Build local dashboard and installer workflows
-3. Add protocol-specific drivers in each bridge service
-4. Add CI/CD and integration tests for all protocols
-
-## Verification
-
-Run full local verification suite (WSL):
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/run_full_verification.sh && scripts/run_full_verification.sh"
-```
-
-Run scaffold and project-engine-only checks:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/verify_phase_scaffold_integrity.sh scripts/verify_project_engine.sh && scripts/verify_phase_scaffold_integrity.sh && scripts/verify_project_engine.sh"
-```
-
-Run only Device SDK verification (including MQTT integration):
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/verify_device_sdk.sh scripts/verify_device_sdk_unit.sh scripts/verify_device_sdk_bootstrap.sh scripts/verify_device_sdk_mqtt_integration.sh && scripts/verify_device_sdk.sh && scripts/verify_device_sdk_unit.sh && scripts/verify_device_sdk_bootstrap.sh && scripts/verify_device_sdk_mqtt_integration.sh"
-```
-
-CI verification runs automatically on every push and pull request via:
-
+- `scripts/run_full_verification.sh`
 - `.github/workflows/stack-verification.yml`
-- `.github/workflows/edge-controller-verification.yml`
-- `.github/workflows/device-sdk-verification.yml`
-- `.github/workflows/project-engine-verification.yml`
-- `.github/workflows/system-generator-verification.yml`
-- `.github/workflows/cloud-services-verification.yml`
-- `.github/workflows/installer-platform-verification.yml`
-- `.github/workflows/telemetry-verification.yml`
-- `.github/workflows/ai-verification.yml`
-- `.github/workflows/observability-verification.yml`
-- `.github/workflows/system-tests-verification.yml`
-
-Monthly JWT security lifecycle checks run via:
-
-- `.github/workflows/jwt-security-lifecycle.yml`
-
-PR-scoped JWT lifecycle checks (path-filtered auth/security changes) run via:
-
-- `.github/workflows/jwt-security-lifecycle-pr.yml`
-
-## Certificate Lifecycle
-
-Issue an extra client certificate:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/issue_client_cert.sh && scripts/issue_client_cert.sh my-client"
-```
-
-Revoke a client certificate and regenerate CRL:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/revoke_client_cert.sh && scripts/revoke_client_cert.sh my-client"
-```
-
-Rotate service certificates and restart dependent services:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/rotate_service_certs.sh && scripts/rotate_service_certs.sh"
-```
-
-Guarded rotation with automatic rollback on failed checks:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/rotate_with_guardrails.sh && scripts/rotate_with_guardrails.sh"
-```
-
-Set backup retention count (default: `14`):
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && BACKUP_RETENTION=7 scripts/rotate_with_guardrails.sh"
-```
-
-Set max total backup size in MB (default: `0`, disabled):
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && BACKUP_MAX_MB=50 scripts/rotate_with_guardrails.sh"
-```
-
-Validate revocation enforcement:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/verify_revocation.sh && scripts/verify_revocation.sh"
-```
-
-Run local certificate expiry and MQTT security event checks:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/check_cert_expiry.sh scripts/check_mqtt_security_events.sh && scripts/check_cert_expiry.sh && scripts/check_mqtt_security_events.sh"
-```
-
-Run JWT security lifecycle checks (revocation, key-id rotation compatibility, revoked-token pruning):
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/verify_auth_security_controls.sh scripts/verify_jwt_kid_rotation.sh scripts/verify_revoked_token_prune.sh && scripts/verify_auth_security_controls.sh && scripts/verify_jwt_kid_rotation.sh && scripts/verify_revoked_token_prune.sh"
-```
-
-Install daily local cron security checks:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/install_local_security_cron.sh && scripts/install_local_security_cron.sh"
-```
-
-The cron installer now includes revoked-token prune maintenance via `scripts/prune_revoked_tokens.sh`.
-
-Zero-downtime dual-cert overlap rotation for one service:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/rotate_service_zero_downtime.sh && scripts/rotate_service_zero_downtime.sh device-registry"
-```
-
-Finalize overlap window and revoke old cert:
-
-```bash
-wsl -d smarthouse-dev -- bash -lc "cd /mnt/c/smarthouse && chmod +x scripts/finalize_zero_downtime_rotation.sh && scripts/finalize_zero_downtime_rotation.sh device-registry /mnt/c/smarthouse/certs/overlap/device-registry/<stamp>.prev.crt"
-```
-
-Scheduled guarded rotation runs monthly via:
-
-- `.github/workflows/cert-rotation-guarded.yml`

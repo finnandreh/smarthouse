@@ -10,7 +10,7 @@ Phase 6 baseline Python SDK for local SmartHouse devices.
 - `device_sdk/core/registry.py`: registry registration helper (`/devices/register`).
 - `device_sdk/transports/mqtt/client.py`: secure MQTT client with mTLS and control subscription handling.
 - `device_sdk/capabilities/catalog.py`: capability catalog by device class.
-- `device_sdk/capabilities/payloads.py`: common JSON payload builders for announce, telemetry, status, and control acknowledgements.
+- `device_sdk/capabilities/payloads.py`: common JSON payload builders for discovery, announce, telemetry, status, and control acknowledgements.
 - `device_sdk/examples/local_device.py`: runnable sample device loop.
 
 ## Quick run
@@ -68,6 +68,10 @@ Legacy-compatible simulator entrypoint (now SDK-backed):
 ```bash
 python examples/devices/esp32_simulator.py
 ```
+
+Runtime note:
+
+- SDK local devices publish both `platform/discovery` and `platform/{house}/{device}/event` announce payloads for compatibility during discovery migration.
 
 Installer bootstrap utility (token + registration without MQTT runtime):
 

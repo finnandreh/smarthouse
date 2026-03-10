@@ -11,8 +11,13 @@ Use this checklist for a new developer/operator onboarding this SmartHouse stack
 ## 2. Read Core Docs
 
 - [ ] Read architecture baseline: `docs/COPILOT_DEVELOPMENT_ORCHESTRATOR.md`.
+- [ ] Read start-here design flow: `docs/START_HERE_DESIGN_FLOW.md`.
+- [ ] Read reproducible WSL setup guide: `docs/WSL_REPRODUCIBLE_SETUP.md`.
+- [ ] Read VS Code exact setup guide: `docs/VS_CODE_EXACT_SETUP.md`.
+- [ ] Read internal setup and operations index: `docs/INTERNAL_SETUP_AND_OPERATIONS.md`.
 - [ ] Read MQTT topic conventions: `docs/TOPIC_CONVENTIONS.md`.
 - [ ] Read security runbook: `docs/MQTT_SECURITY_OPERATIONS_RUNBOOK.md`.
+- [ ] Read house designer JSON contract: `docs/HOUSE_DESIGNER_JSON_CONTRACT.md`.
 
 ## 3. Generate Certificates
 
@@ -90,3 +95,9 @@ If anything fails:
 - [ ] Check MQTT logs: `docker compose logs mqtt --no-color --tail=200`.
 - [ ] Re-run `scripts/run_full_verification.sh`.
 - [ ] Follow incident/troubleshooting in `docs/MQTT_SECURITY_OPERATIONS_RUNBOOK.md`.
+
+## 11. Design Entry (House Designer)
+
+- [ ] Open `web/house_designer/index.html` and create a sample client/property/room hierarchy.
+- [ ] Export JSON and validate shape against `examples/house_designer/client_demo.json`.
+- [ ] Generate parts list with `scripts/generate_parts_list.py`.

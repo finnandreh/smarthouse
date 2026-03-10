@@ -4,6 +4,8 @@ from typing import Any, Dict
 
 import paho.mqtt.client as mqtt
 
+from .mqtt_qos import qos_for_kind
+
 
 class BridgeAdapterBase:
     def __init__(self, bridge_name: str):
@@ -49,4 +51,4 @@ class BridgeAdapterBase:
     def publish_event(self, raw_payload: Dict[str, Any]) -> None:
         topic = f"platform/{self.house_id}/{self.device_id}/event"
         payload = self.normalize_event(raw_payload)
-        self.client.publish(topic, json.dumps(payload), qos=1)
+        self.client.publish(topic, json.dumps(payload), qos=qos_for_kind("event", critical=bool(payload.get("critical"))))

@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartHouse Builder</title>
+  <style>
+    :root {
+      --bg: #f4f0e8;
+      --panel: #fffdf8;
+      --ink: #202020;
+      --muted: #675f55;
+      --accent: #0a7b83;
+      --accent-2: #c26d3f;
+      --line: #d8cebf;
+      --ok: #2d8f5e;
+      --danger: #b2432f;
+      --radius: 14px;
+      --shadow: 0 12px 26px rgba(32, 24, 14, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", "Trebuchet MS", "Gill Sans", sans-serif;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(10, 123, 131, 0.16), transparent 32%),
+        radial-gradient(circle at 84% 18%, rgba(194, 109, 63, 0.17), transparent 34%),
+        linear-gradient(160deg, #f9f6ef 0%, #f0e8dd 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(248, 243, 235, 0.9));
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .content {
+      padding: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 170px;
+      resize: vertical;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 8px 13px;
+      cursor: pointer;
+      font-weight: 600;
+      background: #f5eee1;
+      color: var(--ink);
+      transition: transform 130ms ease, filter 130ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(0.98);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.secondary {
+      background: var(--accent-2);
+      color: #fff;
+    }
+
+    button.danger {
+      border-color: #e3c4b8;
+      color: var(--danger);
+      background: #fff7f3;
+    }
+
+    .tree {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .card.property {
+      border-left: 5px solid #3b8d9d;
+    }
+
+    .card.subject {
+      border-left: 5px solid #c26d3f;
+      margin-top: 8px;
+      margin-left: 14px;
+    }
+
+    .card.floor {
+      border-left: 5px solid #6f9f4b;
+      margin-top: 8px;
+      margin-left: 14px;
+    }
+
+    .card.room {
+      border-left: 5px solid #965f9e;
+      margin-top: 8px;
+      margin-left: 14px;
+    }
+
+    .card.unit {
+      border-left: 5px solid #545454;
+      margin-top: 8px;
+      margin-left: 14px;
+      background: #faf8f3;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #4d4439;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: #f3eee4;
+      color: #5e5549;
+      border: 1px solid var(--line);
+    }
+
+    .tiny {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .ok {
+      color: var(--ok);
+      font-weight: 600;
+    }
+
+    @media (max-width: 960px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel">
+      <div class="head">
+        <div>
+          <h1>System Builder</h1>
+          <p class="subtitle">Client -> Properties -> Subjects -> Floors -> Rooms -> Units</p>
+        </div>
+        <span class="pill" id="count-pill">0 properties</span>
+      </div>
+      <div class="content">
+        <div class="row">
+          <div class="field">
+            <label for="clientName">Client Name</label>
+            <input id="clientName" placeholder="Nordic Homes AS">
+          </div>
+          <div class="field">
+            <label for="clientId">Client ID</label>
+            <input id="clientId" placeholder="client-001">
+          </div>
+        </div>
+        <div class="actions" style="margin-bottom: 10px;">
+          <button class="primary" id="addPropertyBtn">+ Add Property</button>
+          <button id="saveLocalBtn">Save In Browser</button>
+          <button id="loadLocalBtn">Load Saved</button>
+          <button class="secondary" id="downloadBtn">Download JSON</button>
+        </div>
+        <div id="tree" class="tree"></div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="head">
+        <div>
+          <h1>JSON Config</h1>
+          <p class="subtitle">This JSON is your source for later component design</p>
+        </div>
+      </div>
+      <div class="content">
+        <div class="field">
+          <label for="jsonArea">Editable JSON</label>
+          <textarea id="jsonArea"></textarea>
+        </div>
+        <div class="actions" style="margin-top: 10px;">
+          <button id="applyJsonBtn">Apply JSON</button>
+          <button class="danger" id="resetBtn">Reset</button>
+        </div>
+        <p class="tiny">Tip: Use this tool to design one client system. You can create many properties/addresses and full unit hierarchies per property.</p>
+        <p class="tiny ok" id="statusText">Ready.</p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "smarthouse-builder-config-v1";
+
+    function uid(prefix) {
+      const n = Math.random().toString(36).slice(2, 8);
+      return `${prefix}-${n}`;
+    }
+
+    function newUnit() {
+      return {
+        id: uid("unit"),
+        type: "light",
+        name: "New Unit",
+        quantity: 1,
+        notes: ""
+      };
+    }
+
+    function newRoom() {
+      return {
+        id: uid("room"),
+        name: "New Room",
+        units: [newUnit()]
+      };
+    }
+
+    function newFloor() {
+      return {
+        id: uid("floor"),
+        name: "Floor 1",
+        level: 1,
+        rooms: [newRoom()]
+      };
+    }
+
+    function newSubject() {
+      return {
+        id: uid("subject"),
+        name: "House",
+        type: "house",
+        floors: [newFloor()]
+      };
+    }
+
+    function newProperty() {
+      return {
+        id: uid("property"),
+        label: "Main Property",
+        location: "",
+        subjects: [newSubject()]
+      };
+    }
+
+    function defaultModel() {
+      return {
+        version: 1,
+        client: {
+          id: "client-001",
+          name: "New Client"
+        },
+        properties: [newProperty()]
+      };
+    }
+
+    let model = defaultModel();
+
+    const treeEl = document.getElementById("tree");
+    const jsonArea = document.getElementById("jsonArea");
+    const clientNameEl = document.getElementById("clientName");
+    const clientIdEl = document.getElementById("clientId");
+    const countPill = document.getElementById("count-pill");
+    const statusText = document.getElementById("statusText");
+
+    function setStatus(text, isError = false) {
+      statusText.textContent = text;
+      statusText.style.color = isError ? "#b2432f" : "#2d8f5e";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function render() {
+      clientNameEl.value = model.client.name || "";
+      clientIdEl.value = model.client.id || "";
+      countPill.textContent = `${model.properties.length} properties`;
+
+      let html = "";
+
+      model.properties.forEach((property, p) => {
+        html += `
+          <div class="card property">
+            <div class="card-head">
+              <span class="card-title">Property</span>
+              <div class="actions">
+                <button data-action="add-subject" data-p="${p}">+ Subject</button>
+                <button class="danger" data-action="remove-property" data-p="${p}">Remove</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label>Property Label</label>
+                <input data-action="set-property-label" data-p="${p}" value="${escapeHtml(property.label)}">
+              </div>
+              <div class="field">
+                <label>Address / Location</label>
+                <input data-action="set-property-location" data-p="${p}" value="${escapeHtml(property.location || "")}">
+              </div>
+            </div>
+        `;
+
+        property.subjects.forEach((subject, s) => {
+          html += `
+            <div class="card subject">
+              <div class="card-head">
+                <span class="card-title">Subject</span>
+                <div class="actions">
+                  <button data-action="add-floor" data-p="${p}" data-s="${s}">+ Floor</button>
+                  <button class="danger" data-action="remove-subject" data-p="${p}" data-s="${s}">Remove</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label>Name</label>
+                  <input data-action="set-subject-name" data-p="${p}" data-s="${s}" value="${escapeHtml(subject.name)}">
+                </div>
+                <div class="field">
+                  <label>Type</label>
+                  <select data-action="set-subject-type" data-p="${p}" data-s="${s}">
+                    <option value="house" ${subject.type === "house" ? "selected" : ""}>house</option>
+                    <option value="garage" ${subject.type === "garage" ? "selected" : ""}>garage</option>
+                    <option value="gate" ${subject.type === "gate" ? "selected" : ""}>gate</option>
+                    <option value="other" ${subject.type === "other" ? "selected" : ""}>other</option>
+                  </select>
+                </div>
+              </div>
+          `;
+
+          subject.floors.forEach((floor, f) => {
+            html += `
+              <div class="card floor">
+                <div class="card-head">
+                  <span class="card-title">Floor</span>
+                  <div class="actions">
+                    <button data-action="add-room" data-p="${p}" data-s="${s}" data-f="${f}">+ Room</button>
+                    <button class="danger" data-action="remove-floor" data-p="${p}" data-s="${s}" data-f="${f}">Remove</button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="field">
+                    <label>Name</label>
+                    <input data-action="set-floor-name" data-p="${p}" data-s="${s}" data-f="${f}" value="${escapeHtml(floor.name)}">
+                  </div>
+                  <div class="field">
+                    <label>Level</label>
+                    <input type="number" data-action="set-floor-level" data-p="${p}" data-s="${s}" data-f="${f}" value="${Number(floor.level || 0)}">
+                  </div>
+                </div>
+            `;
+
+            floor.rooms.forEach((room, r) => {
+              html += `
+                <div class="card room">
+                  <div class="card-head">
+                    <span class="card-title">Room</span>
+                    <div class="actions">
+                      <button data-action="add-unit" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}">+ Unit</button>
+                      <button class="danger" data-action="remove-room" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}">Remove</button>
+                    </div>
+                  </div>
+                  <div class="field" style="margin-bottom: 8px;">
+                    <label>Name</label>
+                    <input data-action="set-room-name" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" value="${escapeHtml(room.name)}">
+                  </div>
+              `;
+
+              room.units.forEach((unit, u) => {
+                html += `
+                  <div class="card unit">
+                    <div class="card-head">
+                      <span class="card-title">Unit</span>
+                      <button class="danger" data-action="remove-unit" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" data-u="${u}">Remove</button>
+                    </div>
+                    <div class="row">
+                      <div class="field">
+                        <label>Type</label>
+                        <select data-action="set-unit-type" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" data-u="${u}">
+                          <option value="light" ${unit.type === "light" ? "selected" : ""}>light</option>
+                          <option value="outlet" ${unit.type === "outlet" ? "selected" : ""}>outlet</option>
+                          <option value="tempsensor" ${unit.type === "tempsensor" ? "selected" : ""}>tempsensor</option>
+                          <option value="motionsensor" ${unit.type === "motionsensor" ? "selected" : ""}>motionsensor</option>
+                          <option value="camera" ${unit.type === "camera" ? "selected" : ""}>camera</option>
+                          <option value="lock" ${unit.type === "lock" ? "selected" : ""}>lock</option>
+                          <option value="custom" ${unit.type === "custom" ? "selected" : ""}>custom</option>
+                        </select>
+                      </div>
+                      <div class="field">
+                        <label>Name</label>
+                        <input data-action="set-unit-name" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" data-u="${u}" value="${escapeHtml(unit.name)}">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="field">
+                        <label>Quantity</label>
+                        <input type="number" min="1" data-action="set-unit-quantity" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" data-u="${u}" value="${Number(unit.quantity || 1)}">
+                      </div>
+                      <div class="field">
+                        <label>Notes</label>
+                        <input data-action="set-unit-notes" data-p="${p}" data-s="${s}" data-f="${f}" data-r="${r}" data-u="${u}" value="${escapeHtml(unit.notes || "")}">
+                      </div>
+                    </div>
+                  </div>
+                `;
+              });
+
+              html += "</div>";
+            });
+
+            html += "</div>";
+          });
+
+          html += "</div>";
+        });
+
+        html += "</div>";
+      });
+
+      treeEl.innerHTML = html;
+      jsonArea.value = JSON.stringify(model, null, 2);
+    }
+
+    function numberOrDefault(value, fallback) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function getRefs(el) {
+      return {
+        p: Number(el.dataset.p),
+        s: Number(el.dataset.s),
+        f: Number(el.dataset.f),
+        r: Number(el.dataset.r),
+        u: Number(el.dataset.u)
+      };
+    }
+
+    function handleAction(el) {
+      const action = el.dataset.action;
+      if (!action) return;
+      const refs = getRefs(el);
+
+      if (action === "add-subject") model.properties[refs.p].subjects.push(newSubject());
+      if (action === "remove-property") model.properties.splice(refs.p, 1);
+      if (action === "add-floor") model.properties[refs.p].subjects[refs.s].floors.push(newFloor());
+      if (action === "remove-subject") model.properties[refs.p].subjects.splice(refs.s, 1);
+      if (action === "add-room") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms.push(newRoom());
+      if (action === "remove-floor") model.properties[refs.p].subjects[refs.s].floors.splice(refs.f, 1);
+      if (action === "add-unit") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units.push(newUnit());
+      if (action === "remove-room") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms.splice(refs.r, 1);
+      if (action === "remove-unit") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units.splice(refs.u, 1);
+
+      if (action === "set-property-label") model.properties[refs.p].label = el.value;
+      if (action === "set-property-location") model.properties[refs.p].location = el.value;
+      if (action === "set-subject-name") model.properties[refs.p].subjects[refs.s].name = el.value;
+      if (action === "set-subject-type") model.properties[refs.p].subjects[refs.s].type = el.value;
+      if (action === "set-floor-name") model.properties[refs.p].subjects[refs.s].floors[refs.f].name = el.value;
+      if (action === "set-floor-level") model.properties[refs.p].subjects[refs.s].floors[refs.f].level = numberOrDefault(el.value, 0);
+      if (action === "set-room-name") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].name = el.value;
+      if (action === "set-unit-type") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units[refs.u].type = el.value;
+      if (action === "set-unit-name") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units[refs.u].name = el.value;
+      if (action === "set-unit-quantity") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units[refs.u].quantity = Math.max(1, numberOrDefault(el.value, 1));
+      if (action === "set-unit-notes") model.properties[refs.p].subjects[refs.s].floors[refs.f].rooms[refs.r].units[refs.u].notes = el.value;
+
+      if (model.properties.length === 0) {
+        model.properties.push(newProperty());
+      }
+
+      render();
+    }
+
+    treeEl.addEventListener("click", (event) => {
+      const btn = event.target.closest("button[data-action]");
+      if (!btn) return;
+      handleAction(btn);
+    });
+
+    treeEl.addEventListener("input", (event) => {
+      const ctrl = event.target.closest("input[data-action], select[data-action]");
+      if (!ctrl) return;
+      handleAction(ctrl);
+    });
+
+    clientNameEl.addEventListener("input", () => {
+      model.client.name = clientNameEl.value;
+      render();
+    });
+
+    clientIdEl.addEventListener("input", () => {
+      model.client.id = clientIdEl.value;
+      render();
+    });
+
+    document.getElementById("addPropertyBtn").addEventListener("click", () => {
+      model.properties.push(newProperty());
+      render();
+      setStatus("Property added.");
+    });
+
+    document.getElementById("saveLocalBtn").addEventListener("click", () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(model));
+      setStatus("Saved in browser storage.");
+    });
+
+    document.getElementById("loadLocalBtn").addEventListener("click", () => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        setStatus("No saved config found.", true);
+        return;
+      }
+      try {
+        model = JSON.parse(raw);
+        render();
+        setStatus("Loaded saved config.");
+      } catch {
+        setStatus("Saved config is invalid JSON.", true);
+      }
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(model, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${model.client.id || "client"}-system-config.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus("JSON downloaded.");
+    });
+
+    document.getElementById("applyJsonBtn").addEventListener("click", () => {
+      try {
+        const parsed = JSON.parse(jsonArea.value);
+        if (!parsed.client || !Array.isArray(parsed.properties)) {
+          throw new Error("Invalid model");
+        }
+        model = parsed;
+        render();
+        setStatus("JSON applied.");
+      } catch {
+        setStatus("JSON apply failed. Check format.", true);
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      model = defaultModel();
+      render();
+      setStatus("Model reset.");
+    });
+
+    render();
+  </script>
+</body>
+</html>

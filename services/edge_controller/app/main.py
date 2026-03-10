@@ -480,6 +480,19 @@ def health():
     return {"status": "ok", "component": "edge-controller"}
 
 
+@app.get("/metrics")
+def metrics():
+    # Placeholder metrics contract for observability pipeline wiring.
+    return {
+        "service": "edge-controller",
+        "metrics": {
+            "edge_reconcile_events_total": "placeholder",
+            "edge_provisioning_sessions_total": "placeholder",
+            "edge_maintenance_toggles_total": "placeholder",
+        },
+    }
+
+
 @app.get("/health/dependencies")
 def dependency_health():
     services = {
