@@ -1,5 +1,13 @@
 # SmartHouse Platform
 
+## Public source status
+
+This is a prototype and reference architecture. Public source and verification
+scripts do not establish production deployment, hardware validation or a
+security certification. Local examples include explicit `change-me` credentials
+and disposable development database defaults. Replace these before any real
+deployment and keep generated keys, operational data and credentials outside Git.
+
 **A local-first smart building operating framework for design-driven system generation.**
 
 Mission: turn structured building intent into secure, deployable automation systems that run reliably at the edge.
@@ -151,3 +159,7 @@ Start from:
 
 - `scripts/run_full_verification.sh`
 - `.github/workflows/stack-verification.yml`
+
+## License
+
+Copyright © 2026 Finn André Hotvedt. Licensed under the [MIT License](LICENSE).
